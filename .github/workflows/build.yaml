@@ -1,0 +1,42 @@
+name: Spack buildcache build
+
+on: push
+
+env:
+  SPACK_COLOR: always
+  SPACK_BACKTRACE: please
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Checkout Spack
+      uses: actions/checkout@v3
+      with:
+        repository: spack/spack
+        path: spack
+
+    - name: Setup Spack
+      run: echo "$PWD/spack/bin" >> "$GITHUB_PATH"
+
+    - name: Find compilers
+      run: spack -e . compiler find --mixed-toolchain
+
+    - name: Concretize
+      run: spack -e . -v concretize
+
+    - name: Install
+      run: |
+        spack -e . env depfile -o Makefile
+        make -Orecurse -j $(($(nproc) + 1)) SPACK_INSTALL_FLAGS=--no-check-signature
+
+    - name: Push packages and update index
+      run: |
+        spack -e . mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-build-cache
+        spack -e . buildcache push -j $(($(nproc) + 1)) --base-image ubuntu:22.04 --unsigned --update-index local-build-cache
+      if: ${{ !cancelled() }}
