@@ -3,8 +3,17 @@ spack:
   specs:
     - matrix:
       - - adios2
+        - cabana
         - catch2@2
+        - catch2@3
         - cmake
+        - fftw
+        - kokkos+openmp
+        - kokkos-kernels
+        - mpich
+        - omega-h
+        - perfstubs
+        - petsc
       - - '%gcc@12'
   concretizer:
     unify: false
