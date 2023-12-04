@@ -1,18 +1,11 @@
 spack:
   view: false
   specs:
-    - adios2
-    - mpich
-    - cmake
-    - fftw
-    - catch2@2
-    - catch2@3
-    - kokkos@develop std=17
-    - kokkos-kernels
-    - cabana
-    - petsc
-    - perfstubs
-    - omega-h@main
+    - matrix:
+      - - adios2
+        - catch2@2
+        - cmake
+      - - '%gcc@12'
   concretizer:
     unify: false
     reuse: dependencies
